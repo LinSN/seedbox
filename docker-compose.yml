@@ -41,6 +41,23 @@ services:
             - "traefik.http.routers.deluge.rule=Host(`deluge.${TRAEFIK_DOMAIN}`)"
             - "traefik.http.routers.deluge.middlewares=common-auth@file"
 
+    rutorrent:
+        image: linuxserver/rutorrent
+        container_name: rutorrent
+        restart: always
+        environment:
+            - PGID=${PGID}
+            - PUID=${PUID}
+            - TZ=${TZ}
+        volumes:
+            - configrutorrent:/config
+            - downloads:/downloads
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.rutorrent.rule=Host(`rutorrent.${TRAEFIK_DOMAIN}`)"
+            - "traefik.http.routers.rutorrent.middlewares=common-auth@file"
+            - "traefik.port=80"
+        
     plex:
         image: linuxserver/plex
         container_name: plex
@@ -121,6 +138,7 @@ services:
         container_name: bazarr
         restart: always
         volumes:
+            - configbazarr:/config
             - downloads:/downloads
         environment:
             - PGID=${PGID}
@@ -236,6 +254,10 @@ volumes:
         driver: local-persist
         driver_opts:
             mountpoint: /data/config/deluge
+    configrutorrent: 
+        driver: local-persist
+        driver_opts:
+            mountpoint: /data/config/rutorrent
     configtautulli:
         driver: local-persist
         driver_opts:
