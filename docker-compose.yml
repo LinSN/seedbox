@@ -54,8 +54,7 @@ services:
             - "1900:1900/udp"
         volumes:
             - configplex:/config
-            - tvseries:/tv
-            - movies:/movies
+            - downloads:/downloads
         environment:
             - PGID=${PGID}
             - PUID=${PUID}
@@ -90,7 +89,6 @@ services:
         volumes:
             - configsonarr:/config
             - downloads:/downloads
-            - tvseries:/tv
             - /etc/localtime:/etc/localtime:ro
         environment:
             - PGID=${PGID}
@@ -107,7 +105,6 @@ services:
         restart: always
         volumes:
             - configradarr:/config
-            - movies:/movies
             - downloads:/downloads
             - /etc/localtime:/etc/localtime:ro
         environment:
@@ -124,9 +121,7 @@ services:
         container_name: bazarr
         restart: always
         volumes:
-            - movies:/movies
-            - tvseries:/tv
-            - configbazarr:/config
+            - downloads:/downloads
         environment:
             - PGID=${PGID}
             - PUID=${PUID}
@@ -143,7 +138,6 @@ services:
         volumes:
             - configlidarr:/config
             - downloads:/downloads
-            - music:/music
         environment:
             - PGID=${PGID}
             - PUID=${PUID}
@@ -246,22 +240,6 @@ volumes:
         driver: local-persist
         driver_opts:
             mountpoint: /data/config/tautulli
-    library:
-        driver: local-persist
-        driver_opts:
-            mountpoint: /data/library
-    movies:
-        driver: local-persist
-        driver_opts:
-            mountpoint: /data/library/movies
-    tvseries:
-        driver: local-persist
-        driver_opts:
-            mountpoint: /data/library/tvseries
-    music:
-        driver: local-persist
-        driver_opts:
-            mountpoint: /data/library/music
     downloads:
         driver: local-persist
         driver_opts:
