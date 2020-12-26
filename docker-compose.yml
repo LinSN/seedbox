@@ -280,4 +280,4 @@ volumes:
     downloads:
         driver: local-persist
         driver_opts:
-            mountpoint: /data/deluge/
+            mountpoint: /data/downloads/
