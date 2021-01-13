@@ -220,6 +220,21 @@ services:
             - "traefik.http.routers.duplicati.rule=Host(`duplicati.${TRAEFIK_DOMAIN}`)"
             - "traefik.http.routers.duplicati.middlewares=common-auth@file"
 
+    filebrowser:
+        image: hurlenko/filebrowser
+        container_name: filebrowser
+        restart: unless-stopped
+        volumes:
+            - downloads:/data
+            - configfilebrowser:/config
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.filebrowser.rule=Host(`filebrowser.${TRAEFIK_DOMAIN}`)"
+        
+
 networks: 
   default: 
     external:
@@ -270,6 +285,10 @@ volumes:
         driver: local-persist
         driver_opts:
             mountpoint: /data/config/duplicati
+    configfilebrowser:
+        driver: local-persist
+        driver_opts:
+            mountpoint: /data/config/filebrowser
     downloads:
         driver: local-persist
         driver_opts:
