@@ -28,6 +28,10 @@ services:
         volumes:
             - configrutorrent:/config
             - downloads:/downloads
+        ports:
+            - 5000:5000
+            - 51413:51413
+            - 6881:6881/udp
         labels:
             - "traefik.enable=true"
             - "traefik.http.routers.rutorrent.rule=Host(`rutorrent.${TRAEFIK_DOMAIN}`)"
