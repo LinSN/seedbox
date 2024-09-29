@@ -1,27 +1,6 @@
 version: "3.7"
 
-services:
-    # rutorrent:
-    #     image: crazymax/rtorrent-rutorrent
-    #     container_name: rutorrent
-    #     restart: always
-    #     environment:
-    #         - PGID=${PGID}
-    #         - PUID=${PUID}
-    #         - TZ=${TZ}
-    #     volumes:
-    #         - configrutorrent:/config
-    #         - downloads:/downloads
-    #     ports:
-    #         - 5000:5000
-    #         - 51413:51413
-    #         - 6881:6881/udp
-    #     labels:
-    #         - "traefik.enable=true"
-    #         - "traefik.http.routers.rutorrent.rule=Host(`rutorrent.${TRAEFIK_DOMAIN}`)"
-    #         - "traefik.http.routers.rutorrent.middlewares=common-auth@file"
-    #         - "traefik.port=80"
-        
+services:     
     transmission:
         image: lscr.io/linuxserver/transmission
         container_name: transmission
@@ -62,20 +41,7 @@ services:
             - "traefik.enable=true"
             - "traefik.http.services.plex.loadbalancer.server.port=32400"
             - "traefik.http.routers.plex.rule=Host(`plex.${TRAEFIK_DOMAIN}`)"
-    # emby:
-    #     image: lscr.io/linuxserver/emby
-    #     container_name: emby
-    #     environment:
-    #         - PGID=${PGID}
-    #         - PUID=${PUID}
-    #         - TZ=${TZ}
-    #     volumes:
-    #         - configemby:/config
-    #         - downloads:/downloads
-    #     ports:
-    #     - 8096:8096
-    #     restart: unless-stopped
-    
+
     sonarr:
         image: linuxserver/sonarr:develop
         container_name: sonarr
@@ -169,29 +135,9 @@ services:
             - "traefik.http.routers.portainer.rule=Host(`portainer.${TRAEFIK_DOMAIN}`)"
             - "traefik.http.services.portainer-seedbox.loadbalancer.server.port=9000"
 
-    # netdata:
-    #     image: netdata/netdata
-    #     restart: always
-    #     container_name: netdata
-    #     hostname: netdata.${TRAEFIK_DOMAIN}
-    #     environment:
-    #         PGID: 999
-    #     cap_add:
-    #         - SYS_PTRACE
-    #     security_opt:
-    #         - apparmor:unconfined
-    #     volumes:
-    #         - /proc:/host/proc:ro
-    #         - /sys:/host/sys:ro
-    #         - /var/run/docker.sock:/var/run/docker.sock:rw
-    #     labels:
-    #         - "traefik.enable=true"
-    #         - "traefik.http.routers.netdata.rule=Host(`netdata.${TRAEFIK_DOMAIN}`)"
-    #         - "traefik.http.routers.netdata.middlewares=common-auth@file"
-
     flaresolverr:
         # DockerHub mirror flaresolverr/flaresolverr:latest
-        image: ghcr.io/flaresolverr/flaresolverr:latest
+        image: 21hsmw/flaresolverr:nodriver
         container_name: flaresolverr
         environment:
         # Used to change the verbosity of the logging
@@ -205,36 +151,6 @@ services:
         - 8191:8191
         restart: unless-stopped 
     
-    # duplicati:
-    #     image: linuxserver/duplicati
-    #     container_name: duplicati
-    #     restart: unless-stopped
-    #     environment:
-    #         - PUID=${PUID}
-    #         - PGID=${PGID}
-    #         - TZ=${TZ}
-    #     volumes:
-    #         - configduplicati:/config
-    #         - backups:/backups
-    #         - alldata:/source
-    #     labels:
-    #         - "traefik.enable=true"
-    #         - "traefik.http.routers.duplicati.rule=Host(`duplicati.${TRAEFIK_DOMAIN}`)"
-    #         - "traefik.http.routers.duplicati.middlewares=common-auth@file"
-
-    # filebrowser:
-    #     image: hurlenko/filebrowser
-    #     container_name: filebrowser
-    #     restart: unless-stopped
-    #     volumes:
-    #         - downloads:/data
-    #         - configfilebrowser:/config
-    #     environment:
-    #         - PUID=${PUID}
-    #         - PGID=${PGID}
-    #     labels:
-    #         - "traefik.enable=true"
-    #         - "traefik.http.routers.filebrowser.rule=Host(`filebrowser.${TRAEFIK_DOMAIN}`)"
     prowlarr:
         image: ghcr.io/linuxserver/prowlarr:develop
         container_name: prowlarr
@@ -248,37 +164,6 @@ services:
         labels:
             - "traefik.enable=true"
             - "traefik.http.routers.prowlarr.rule=Host(`prowlarr.${TRAEFIK_DOMAIN}`)"
-    # filestash:
-    #     image: machines/filestash
-    #     container_name: filestash
-    #     ports:
-    #         - 8334:8334
-    #     restart: always
-    #     labels:
-    #         - "traefik.enable=true"
-    #         - "traefik.http.routers.filestash.rule=Host(`filestash.${TRAEFIK_DOMAIN}`)"
-    #         - "traefik.http.services.filestash.loadbalancer.server.port=8334"
-
-
-    # samba:
-    #     image: dperson/samba
-    #     container_name: samba
-    #     environment:
-    #         - PUID=${PUID}
-    #         - PGID=${PGID}
-    #     ports:
-    #         - "137:137/udp"
-    #         - "138:138/udp"
-    #         - "139:139/tcp"
-    #         - "445:445/tcp"
-    #     restart: unless-stopped
-    #     volumes:
-    #         - /data/downloads/:/library:z
-    #     command: '-s "library;/library"  -u "linsn;linsnpassword123456789" -p'
-    #     labels:
-    #         - "traefik.enable=true"
-    #         - "traefik.http.routers.samba.rule=Host(`samba.${TRAEFIK_DOMAIN}`)"
-        
 
 networks: 
   default: 
