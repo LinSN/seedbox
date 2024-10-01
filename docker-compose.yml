@@ -143,6 +143,7 @@ services:
         # Used to change the verbosity of the logging
         - LOG_LEVEL=info
         - DRIVER:nodriver
+        - CHROME_FLAGS=--no-sandbox
         # Enables hcaptcha-solver => https://github.com/JimmyLaurent/hcaptcha-solver
         - CAPTCHA_SOLVER=hcaptcha-solver
         # Enables CaptchaHarvester => https://github.com/NoahCardoza/CaptchaHarvester
@@ -200,14 +201,6 @@ volumes:
         driver: local-persist
         driver_opts:
             mountpoint: /data/config/lidarr
-    configdeluge: 
-        driver: local-persist
-        driver_opts:
-            mountpoint: /data/config/deluge
-    configrutorrent: 
-        driver: local-persist
-        driver_opts:
-            mountpoint: /data/config/rutorrent
     configtransmission: 
         driver: local-persist
         driver_opts:
@@ -216,14 +209,6 @@ volumes:
         driver: local-persist
         driver_opts:
             mountpoint: /data/config/tautulli
-    configduplicati:
-        driver: local-persist
-        driver_opts:
-            mountpoint: /data/config/duplicati
-    configfilebrowser:
-        driver: local-persist
-        driver_opts:
-            mountpoint: /data/config/filebrowser
     configprowlarr:
         driver: local-persist
         driver_opts:
