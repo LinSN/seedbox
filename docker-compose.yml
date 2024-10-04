@@ -143,7 +143,6 @@ services:
         # Used to change the verbosity of the logging
         - LOG_LEVEL=info
         - DRIVER:nodriver
-        - CHROME_FLAGS=--no-sandbox
         # Enables hcaptcha-solver => https://github.com/JimmyLaurent/hcaptcha-solver
         - CAPTCHA_SOLVER=hcaptcha-solver
         # Enables CaptchaHarvester => https://github.com/NoahCardoza/CaptchaHarvester
