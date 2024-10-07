@@ -23,7 +23,17 @@ services:
             # Docker labels for enabling Traefik dashboard
             - "traefik.http.routers.traefik.rule=Host(`traefik.${TRAEFIK_DOMAIN}`)"
             - "traefik.http.routers.traefik.service=api@internal"
-            - "traefik.http.routers.traefik.middlewares=common-auth@file"
+            - "traefik.http.routers.traefik.middlewares=google-oauth@file"
+    
+    forward-auth:
+        image: thomseddon/traefik-forward-auth
+        container_name: forward-auth
+        environment:
+        - PROVIDERS_GOOGLE_CLIENT_ID=${PROVIDERS_GOOGLE_CLIENT_ID}
+        - PROVIDERS_GOOGLE_CLIENT_SECRET=${PROVIDERS_GOOGLE_CLIENT_SECRET}
+        - COOKIE_SECRET=${COOKIE_SECRET}
+        - DEFAULT_PROVIDER=google
+        restart: always
             
     transmission:
         image: lscr.io/linuxserver/transmission
@@ -43,7 +53,7 @@ services:
         labels:
             - "traefik.enable=true"
             - "traefik.http.routers.transmission.rule=Host(`transmission.${TRAEFIK_DOMAIN}`)"
-            - "traefik.http.routers.transmission.middlewares=common-auth@file"
+            - "traefik.http.routers.transmission.middlewares=google-oauth@file"
         restart: unless-stopped
 
     plex:
@@ -81,7 +91,7 @@ services:
         labels:
             - "traefik.enable=true"
             - "traefik.http.routers.sonarr.rule=Host(`sonarr.${TRAEFIK_DOMAIN}`)"
-            - "traefik.http.routers.sonarr.middlewares=common-auth@file"
+            - "traefik.http.routers.sonarr.middlewares=google-oauth@file"
 
     radarr:
         image: linuxserver/radarr:develop
@@ -98,7 +108,7 @@ services:
         labels:
             - "traefik.enable=true"
             - "traefik.http.routers.radarr.rule=Host(`radarr.${TRAEFIK_DOMAIN}`)"
-            - "traefik.http.routers.radarr.middlewares=common-auth@file"
+            - "traefik.http.routers.radarr.middlewares=google-oauth@file"
 
     bazarr:
         image: linuxserver/bazarr
@@ -114,7 +124,7 @@ services:
         labels:
             - "traefik.enable=true"
             - "traefik.http.routers.bazarr.rule=Host(`bazarr.${TRAEFIK_DOMAIN}`)"
-            - "traefik.http.routers.bazarr.middlewares=common-auth@file"
+            - "traefik.http.routers.bazarr.middlewares=google-oauth@file"
 
     lidarr:
         image: linuxserver/lidarr:develop
@@ -130,7 +140,7 @@ services:
         labels:
             - "traefik.enable=true"
             - "traefik.http.routers.lidarr.rule=Host(`lidarr.${TRAEFIK_DOMAIN}`)"
-            - "traefik.http.routers.lidarr.middlewares=common-auth@file"
+            - "traefik.http.routers.lidarr.middlewares=google-oauth@file"
 
     tautulli:
         image: linuxserver/tautulli
@@ -146,6 +156,8 @@ services:
         labels:
             - "traefik.enable=true"
             - "traefik.http.routers.tautulli.rule=Host(`tautulli.${TRAEFIK_DOMAIN}`)"
+            - "traefik.http.routers.tautulli.middlewares=google-oauth@file"
+
 
     portainer:
         image: portainer/portainer-ce
@@ -190,6 +202,8 @@ services:
         labels:
             - "traefik.enable=true"
             - "traefik.http.routers.prowlarr.rule=Host(`prowlarr.${TRAEFIK_DOMAIN}`)"
+            - "traefik.http.routers.prowlarr.middlewares=google-oauth@file"
+
 
 networks: 
   default: 

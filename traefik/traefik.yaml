@@ -11,9 +11,9 @@ providers:
   docker:
     endpoint: "unix:///var/run/docker.sock"
     network: "traefik-network"
-    exposedByDefault: false # Only expose explicitly enabled containers
+    exposedByDefault: false
   file:
-    directory: /etc/traefik/custom
+    directory: /etc/traefik
     watch: true
 
 entryPoints:
@@ -30,7 +30,8 @@ entryPoints:
       tls:
         certResolver: le
       middlewares:
-      - security-headers@file
+        - google-oauth@file
+
 
 # Allow self-signed certificates for https backends (nextcloud for example)
 serversTransport:

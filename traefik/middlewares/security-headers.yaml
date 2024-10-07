@@ -1,8 +1,5 @@
 http:
   middlewares:
-    common-auth:
-      basicAuth:
-        usersFile: "/etc/traefik/http_auth"
     security-headers:
       headers:
         forceSTSHeader: true
