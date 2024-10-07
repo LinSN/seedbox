@@ -33,6 +33,9 @@ services:
         - PROVIDERS_GOOGLE_CLIENT_SECRET=${PROVIDERS_GOOGLE_CLIENT_SECRET}
         - COOKIE_SECRET=${COOKIE_SECRET}
         - DEFAULT_PROVIDER=google
+        - AUTH_HOST=traefik.linsn.work
+        - WHITELIST=slimaninordine@gmail.com  # Specify the email to whitelist
+
         restart: always
             
     transmission:
