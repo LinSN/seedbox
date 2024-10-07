@@ -1,6 +1,30 @@
 version: "3.7"
 
-services:     
+services:   
+    traefik:
+        image: traefik
+        container_name: traefik
+        restart: always
+        command: 
+            - --certificatesresolvers.le.acme.email=${ACME_MAIL}
+              #  - --pilot.token=${PILOT_TOKEN}
+        ports:
+            - "80:80"
+            - "443:443"
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+            - ./traefik:/etc/traefik:ro
+            - configtraefik:/config
+        environment:
+            - TRAEFIK_DOMAIN=${TRAEFIK_DOMAIN}
+            - TZ=${TZ}
+        labels:
+            - "traefik.enable=true"
+            # Docker labels for enabling Traefik dashboard
+            - "traefik.http.routers.traefik.rule=Host(`traefik.${TRAEFIK_DOMAIN}`)"
+            - "traefik.http.routers.traefik.service=api@internal"
+            - "traefik.http.routers.traefik.middlewares=common-auth@file"
+            
     transmission:
         image: lscr.io/linuxserver/transmission
         container_name: transmission
@@ -141,8 +165,9 @@ services:
     #     container_name: flaresolverr
     #     environment:
     #         # Used to change the verbosity of the logging
-    #         - LOG_LEVEL=debug
-    #         - DRIVER:nodriver
+    #         - LOG_LEVEL=info
+    #         - DRIVER=nodriver
+    #         - HOST=localhost
     #         # Enables hcaptcha-solver => https://github.com/JimmyLaurent/hcaptcha-solver
     #         - CAPTCHA_SOLVER=hcaptcha-solver
     #         # Enables CaptchaHarvester => https://github.com/NoahCardoza/CaptchaHarvester
@@ -180,6 +205,10 @@ volumes:
         driver: local-persist
         driver_opts:
             mountpoint: /data/config
+    configtraefik:
+        driver: local-persist
+        driver_opts:
+            mountpoint: /data/config/traefik
     configplex:
         driver: local-persist
         driver_opts:
@@ -212,10 +241,6 @@ volumes:
         driver: local-persist
         driver_opts:
             mountpoint: /data/config/prowlarr
-    # configemby:
-    #     driver: local-persist
-    #     driver_opts:
-    #         mountpoint: /data/config/emby
     downloads:
         driver: local-persist
         driver_opts:
