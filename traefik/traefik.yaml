@@ -1,6 +1,9 @@
 api:
   dashboard: true
 
+log:
+  level: DEBUG
+  
 # Set Access logs timezone
 accessLog:
   fields:
