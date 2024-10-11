@@ -1,5 +1,3 @@
-version: "3.7"
-
 services:   
     traefik:
         image: traefik
@@ -71,7 +69,7 @@ services:
         labels:
             - "traefik.enable=true"
             - "traefik.http.routers.transmission.rule=Host(`transmission.${TRAEFIK_DOMAIN}`)"
-            - "traefik.http.routers.transmission.middlewares=google-oauth@file"
+            - "traefik.http.routers.transmission.middlewares=google-oauth@file,security-headers@file"
         restart: unless-stopped
 
     plex:
@@ -109,7 +107,7 @@ services:
         labels:
             - "traefik.enable=true"
             - "traefik.http.routers.sonarr.rule=Host(`sonarr.${TRAEFIK_DOMAIN}`)"
-            - "traefik.http.routers.sonarr.middlewares=google-oauth@file"
+            - "traefik.http.routers.sonarr.middlewares=google-oauth@file,security-headers@file"
 
     radarr:
         image: linuxserver/radarr:develop
@@ -126,7 +124,7 @@ services:
         labels:
             - "traefik.enable=true"
             - "traefik.http.routers.radarr.rule=Host(`radarr.${TRAEFIK_DOMAIN}`)"
-            - "traefik.http.routers.radarr.middlewares=google-oauth@file"
+            - "traefik.http.routers.radarr.middlewares=google-oauth@file,security-headers@file"
 
     bazarr:
         image: linuxserver/bazarr
@@ -142,7 +140,7 @@ services:
         labels:
             - "traefik.enable=true"
             - "traefik.http.routers.bazarr.rule=Host(`bazarr.${TRAEFIK_DOMAIN}`)"
-            - "traefik.http.routers.bazarr.middlewares=google-oauth@file"
+            - "traefik.http.routers.bazarr.middlewares=google-oauth@file,security-headers@file"
 
     lidarr:
         image: linuxserver/lidarr:develop
@@ -158,7 +156,7 @@ services:
         labels:
             - "traefik.enable=true"
             - "traefik.http.routers.lidarr.rule=Host(`lidarr.${TRAEFIK_DOMAIN}`)"
-            - "traefik.http.routers.lidarr.middlewares=google-oauth@file"
+            - "traefik.http.routers.lidarr.middlewares=google-oauth@file,security-headers@file"
 
     tautulli:
         image: linuxserver/tautulli
@@ -174,7 +172,7 @@ services:
         labels:
             - "traefik.enable=true"
             - "traefik.http.routers.tautulli.rule=Host(`tautulli.${TRAEFIK_DOMAIN}`)"
-            - "traefik.http.routers.tautulli.middlewares=google-oauth@file"
+            - "traefik.http.routers.tautulli.middlewares=google-oauth@file,security-headers@file"
 
 
     portainer:
@@ -220,13 +218,13 @@ services:
         labels:
             - "traefik.enable=true"
             - "traefik.http.routers.prowlarr.rule=Host(`prowlarr.${TRAEFIK_DOMAIN}`)"
-            - "traefik.http.routers.prowlarr.middlewares=google-oauth@file"
+            - "traefik.http.routers.prowlarr.middlewares=google-oauth@file,security-headers@file"
 
 
 networks: 
   default: 
-    external:
-      name: "traefik-network"
+    external: true
+    name: "traefik-network"
 
 volumes:
     alldata:
