@@ -180,12 +180,18 @@ services:
         container_name: portainer
         restart: always
         volumes:
-            - /var/run/docker.sock:/var/run/docker.sock
+        - /var/run/docker.sock:/var/run/docker.sock
+        - configportainer:/data  # Ajout d'un volume persistant pour les données Portainer
+        environment:
+        - PORTAINER_ADMIN_PASSWORD=${PORTAINER_ADMIN_PASSWORD}  # Définissez cette variable dans votre .env
         command: --admin-password ${PORTAINER_ADMIN_PASSWORD} --host=unix:///var/run/docker.sock
         labels:
-            - "traefik.enable=true"
-            - "traefik.http.routers.portainer.rule=Host(`portainer.${TRAEFIK_DOMAIN}`)"
-            - "traefik.http.services.portainer-seedbox.loadbalancer.server.port=9000"
+        - "traefik.enable=true"
+        - "traefik.http.routers.portainer.rule=Host(`portainer.${TRAEFIK_DOMAIN}`)"
+        - "traefik.http.routers.portainer.entrypoints=secure"
+        - "traefik.http.routers.portainer.tls.certresolver=le"
+        - "traefik.http.routers.portainer.middlewares=google-oauth@file"
+        - "traefik.http.services.portainer.loadbalancer.server.port=9000"
 
     # flaresolverr:
     #     # DockerHub mirror flaresolverr/flaresolverr:latest
@@ -271,11 +277,11 @@ volumes:
         driver: local-persist
         driver_opts:
             mountpoint: /data/config/prowlarr
+    configportainer:
+        driver: local-persist
+        driver_opts:
+            mountpoint: /data/config/portainer
     downloads:
         driver: local-persist
         driver_opts:
             mountpoint: /data/downloads/
-    backups:
-        driver: local-persist
-        driver_opts:
-            mountpoint: /mnt/save
