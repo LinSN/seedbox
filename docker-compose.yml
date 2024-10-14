@@ -190,7 +190,7 @@ services:
         - "traefik.http.routers.portainer.rule=Host(`portainer.${TRAEFIK_DOMAIN}`)"
         - "traefik.http.routers.portainer.entrypoints=secure"
         - "traefik.http.routers.portainer.tls.certresolver=le"
-        - "traefik.http.routers.portainer.middlewares=google-oauth@file"
+        - "traefik.http.routers.portainer.middlewares=google-oauth@file,security-headers@file"
         - "traefik.http.services.portainer.loadbalancer.server.port=9000"
 
     # flaresolverr:
@@ -225,6 +225,7 @@ services:
             - "traefik.enable=true"
             - "traefik.http.routers.prowlarr.rule=Host(`prowlarr.${TRAEFIK_DOMAIN}`)"
             - "traefik.http.routers.prowlarr.middlewares=google-oauth@file,security-headers@file"
+            
 
 
 networks: 
