@@ -28,11 +28,11 @@ services:
             - "traefik.http.routers.traefik.tls.certresolver=le"
 
             # Route pour /_oauth sans middleware
-            - "traefik.http.routers.forward-auth.rule=Host(traefik.${TRAEFIK_DOMAIN}) && PathPrefix(/_oauth)"
-            - "traefik.http.routers.forward-auth.service=forward-auth"
-            - "traefik.http.services.forward-auth.loadbalancer.server.port=4181"
-            - "traefik.http.routers.forward-auth.entrypoints=secure"
-            - "traefik.http.routers.forward-auth.tls.certresolver=le"
+            - "traefik.http.routers.forward-oauth.rule=Host(traefik.${TRAEFIK_DOMAIN}) && PathPrefix(/_oauth)"
+            - "traefik.http.routers.forward-oauth.service=forward-auth"
+            - "traefik.http.services.forward-oauth.loadbalancer.server.port=4181"
+            - "traefik.http.routers.forward-oauth.entrypoints=secure"
+            - "traefik.http.routers.forward-oauth.tls.certresolver=le"
     
     forward-auth:
         image: thomseddon/traefik-forward-auth:latest
@@ -51,28 +51,6 @@ services:
         - CSRF_COOKIE_HTTP_ONLY=true
         - CSRF_COOKIE_SAME_SITE=Lax
         restart: always
-
-    # google-oauth:
-    #     image: quay.io/google-oauth/google-oauth:latest
-    #     container_name: google-oauth
-    #     restart: always
-    #     ports:
-    #         - "4181:4181"
-    #     environment:
-    #         - OAUTH2_PROXY_PROVIDER=google
-    #         - OAUTH2_PROXY_CLIENT_ID=${PROVIDERS_GOOGLE_CLIENT_ID}
-    #         - OAUTH2_PROXY_CLIENT_SECRET=${PROVIDERS_GOOGLE_CLIENT_SECRET}
-    #         - OAUTH2_PROXY_COOKIE_DOMAIN=linsn.work
-    #         - OAUTH2_PROXY_EMAIL_DOMAINS=*
-    #         - OAUTH2_PROXY_REDIRECT_URL=https://auth.linsn.work/_oauth
-    #         - OAUTH2_PROXY_AUTHENTICATED_EMAILS=${OAUTH2_PROXY_AUTHENTICATED_EMAILS}
-    #         - OAUTH2_PROXY_COOKIE_SECRET=${SECRET}
-    #         - OAUTH2_PROXY_COOKIE_SECURE=true
-    #         - OAUTH2_PROXY_COOKIE_SAMESITE=lax
-    #         - OAUTH2_PROXY_PASS_BASIC_AUTH=false
-    #         - OAUTH2_PROXY_SKIP_PROVIDER_BUTTON=true
-    #     command:
-    #         - --http-address=0.0.0.0:4181
             
     transmission:
         image: lscr.io/linuxserver/transmission
