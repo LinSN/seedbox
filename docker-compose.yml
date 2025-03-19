@@ -5,6 +5,8 @@ services:
         restart: always
         command: 
             - --certificatesresolvers.le.acme.email=${ACME_MAIL}
+            - --certificatesresolvers.le.acme.httpchallenge=true
+            - --certificatesresolvers.le.acme.httpchallenge.entrypoint=insecure
               #  - --pilot.token=${PILOT_TOKEN}
         ports:
             - "80:80"
@@ -25,15 +27,15 @@ services:
             - "traefik.http.routers.traefik.entrypoints=secure"
             - "traefik.http.routers.traefik.tls.certresolver=le"
 
-              # Route pour /_oauth sans middleware
-            - "traefik.http.routers.forward-auth.rule=Host(`traefik.${TRAEFIK_DOMAIN}`) && PathPrefix(`/_oauth`)"
+            # Route pour /_oauth sans middleware
+            - "traefik.http.routers.forward-auth.rule=Host(traefik.${TRAEFIK_DOMAIN}) && PathPrefix(/_oauth)"
             - "traefik.http.routers.forward-auth.service=forward-auth"
             - "traefik.http.services.forward-auth.loadbalancer.server.port=4181"
             - "traefik.http.routers.forward-auth.entrypoints=secure"
             - "traefik.http.routers.forward-auth.tls.certresolver=le"
     
     forward-auth:
-        image: thomseddon/traefik-forward-auth
+        image: thomseddon/traefik-forward-auth:latest
         container_name: forward-auth
         environment:
         - PROVIDERS_GOOGLE_CLIENT_ID=${PROVIDERS_GOOGLE_CLIENT_ID}
@@ -48,8 +50,29 @@ services:
         - CSRF_COOKIE_SECURE=true
         - CSRF_COOKIE_HTTP_ONLY=true
         - CSRF_COOKIE_SAME_SITE=Lax
-
         restart: always
+
+    # google-oauth:
+    #     image: quay.io/google-oauth/google-oauth:latest
+    #     container_name: google-oauth
+    #     restart: always
+    #     ports:
+    #         - "4181:4181"
+    #     environment:
+    #         - OAUTH2_PROXY_PROVIDER=google
+    #         - OAUTH2_PROXY_CLIENT_ID=${PROVIDERS_GOOGLE_CLIENT_ID}
+    #         - OAUTH2_PROXY_CLIENT_SECRET=${PROVIDERS_GOOGLE_CLIENT_SECRET}
+    #         - OAUTH2_PROXY_COOKIE_DOMAIN=linsn.work
+    #         - OAUTH2_PROXY_EMAIL_DOMAINS=*
+    #         - OAUTH2_PROXY_REDIRECT_URL=https://auth.linsn.work/_oauth
+    #         - OAUTH2_PROXY_AUTHENTICATED_EMAILS=${OAUTH2_PROXY_AUTHENTICATED_EMAILS}
+    #         - OAUTH2_PROXY_COOKIE_SECRET=${SECRET}
+    #         - OAUTH2_PROXY_COOKIE_SECURE=true
+    #         - OAUTH2_PROXY_COOKIE_SAMESITE=lax
+    #         - OAUTH2_PROXY_PASS_BASIC_AUTH=false
+    #         - OAUTH2_PROXY_SKIP_PROVIDER_BUTTON=true
+    #     command:
+    #         - --http-address=0.0.0.0:4181
             
     transmission:
         image: lscr.io/linuxserver/transmission
@@ -58,7 +81,7 @@ services:
             - PGID=${PGID}
             - PUID=${PUID}
             - TZ=${TZ}
-            - TRANSMISSION_WEB_HOME=/flood-for-transmission/ #optional
+            - TRANSMISSION_WEB_HOME=/config/flood-for-transmission #optional
         volumes:
             - configtransmission:/config
             - downloads:/downloads
@@ -192,6 +215,35 @@ services:
         - "traefik.http.routers.portainer.tls.certresolver=le"
         - "traefik.http.routers.portainer.middlewares=google-oauth@file,security-headers@file"
         - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+    
+    prowlarr:
+        image: ghcr.io/linuxserver/prowlarr:develop
+        container_name: prowlarr
+        restart: unless-stopped
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+        volumes:
+            - configprowlarr:/config
+        
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.prowlarr.rule=Host(`prowlarr.${TRAEFIK_DOMAIN}`)"
+            - "traefik.http.routers.prowlarr.middlewares=google-oauth@file,security-headers@file"
+
+    ombi:
+        image: lscr.io/linuxserver/ombi:latest
+        container_name: ombi
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - TZ=${TZ}
+        volumes:
+            - configombi:/config   
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.ombi.rule=Host(`ombi.${TRAEFIK_DOMAIN}`)"
+            - "traefik.http.routers.ombi.middlewares=security-headers@file"
 
     # flaresolverr:
     #     # DockerHub mirror flaresolverr/flaresolverr:latest
@@ -210,23 +262,6 @@ services:
     #     ports:
     #     - 8191:8191
     #     restart: unless-stopped 
-    
-    prowlarr:
-        image: ghcr.io/linuxserver/prowlarr:develop
-        container_name: prowlarr
-        restart: unless-stopped
-        environment:
-            - PUID=${PUID}
-            - PGID=${PGID}
-        volumes:
-            - configprowlarr:/config
-        
-        labels:
-            - "traefik.enable=true"
-            - "traefik.http.routers.prowlarr.rule=Host(`prowlarr.${TRAEFIK_DOMAIN}`)"
-            - "traefik.http.routers.prowlarr.middlewares=google-oauth@file,security-headers@file"
-            
-
 
 networks: 
   default: 
@@ -282,6 +317,10 @@ volumes:
         driver: local-persist
         driver_opts:
             mountpoint: /data/config/portainer
+    configombi:
+        driver: local-persist
+        driver_opts:
+            mountpoint: /data/config/ombi
     downloads:
         driver: local-persist
         driver_opts:
