@@ -26,13 +26,6 @@ services:
             - "traefik.http.routers.traefik.middlewares=google-oauth@file"
             - "traefik.http.routers.traefik.entrypoints=secure"
             - "traefik.http.routers.traefik.tls.certresolver=le"
-
-            # Route pour /_oauth sans middleware
-            - "traefik.http.routers.forward-oauth.rule=Host(traefik.${TRAEFIK_DOMAIN}) && PathPrefix(/_oauth)"
-            - "traefik.http.routers.forward-oauth.service=forward-auth"
-            - "traefik.http.services.forward-oauth.loadbalancer.server.port=4181"
-            - "traefik.http.routers.forward-oauth.entrypoints=secure"
-            - "traefik.http.routers.forward-oauth.tls.certresolver=le"
     
     forward-auth:
         image: thomseddon/traefik-forward-auth:latest
@@ -51,27 +44,47 @@ services:
         - CSRF_COOKIE_HTTP_ONLY=true
         - CSRF_COOKIE_SAME_SITE=Lax
         restart: always
+        labels:
+             # Route pour /_oauth sans middleware
+            - "traefik.http.routers.forward-oauth.rule=Host(`traefik.${TRAEFIK_DOMAIN}`) && PathPrefix(`/_oauth`)"
+            - "traefik.http.routers.forward-oauth.service=forward-auth"
+            - "traefik.http.services.forward-oauth.loadbalancer.server.port=4181"
+            - "traefik.http.routers.forward-oauth.entrypoints=secure"
+            - "traefik.http.routers.forward-oauth.tls.certresolver=le"
             
     transmission:
         image: lscr.io/linuxserver/transmission
         container_name: transmission
+        restart: unless-stopped
         environment:
             - PGID=${PGID}
             - PUID=${PUID}
             - TZ=${TZ}
-            - TRANSMISSION_WEB_HOME=/config/flood-for-transmission #optional
+            - TRANSMISSION_WEB_HOME=/config/Shift            # optionnel
+            # --- Sécurité RPC ---
+            - WHITELIST=192.168.*,10.*,172.*                      # RPC accessible seulement depuis ton LAN
+        # --- Divers ---
+            - PEERPORT=51413                                # fixe le port bittorrent
         volumes:
             - configtransmission:/config
             - downloads:/downloads
+
+        # ⚠️ ON RETIRE le publish du port 9091
+        expose:
+            - "9091"                                        # visible uniquement dans le réseau Docker
+
+        # Le port 51413 reste publié pour les pairs bittorrent
         ports:
-            - 9091:9091
-            - 51413:51413
-            - 51413:51413/udp
+            - "51413:51413/tcp"
+            - "51413:51413/udp"
+
         labels:
             - "traefik.enable=true"
             - "traefik.http.routers.transmission.rule=Host(`transmission.${TRAEFIK_DOMAIN}`)"
+            - "traefik.http.routers.transmission.entrypoints=secure"
+            - "traefik.http.routers.transmission.tls.certresolver=le"
             - "traefik.http.routers.transmission.middlewares=google-oauth@file,security-headers@file"
-        restart: unless-stopped
+            - "traefik.http.services.transmission.loadbalancer.server.port=9091"
 
     plex:
         image: linuxserver/plex
@@ -209,19 +222,19 @@ services:
             - "traefik.http.routers.prowlarr.rule=Host(`prowlarr.${TRAEFIK_DOMAIN}`)"
             - "traefik.http.routers.prowlarr.middlewares=google-oauth@file,security-headers@file"
 
-    ombi:
-        image: lscr.io/linuxserver/ombi:latest
-        container_name: ombi
-        environment:
-            - PUID=${PUID}
-            - PGID=${PGID}
-            - TZ=${TZ}
-        volumes:
-            - configombi:/config   
-        labels:
-            - "traefik.enable=true"
-            - "traefik.http.routers.ombi.rule=Host(`ombi.${TRAEFIK_DOMAIN}`)"
-            - "traefik.http.routers.ombi.middlewares=security-headers@file"
+    # ombi:
+    #     image: lscr.io/linuxserver/ombi:latest
+    #     container_name: ombi
+    #     environment:
+    #         - PUID=${PUID}
+    #         - PGID=${PGID}
+    #         - TZ=${TZ}
+    #     volumes:
+    #         - configombi:/config   
+    #     labels:
+    #         - "traefik.enable=true"
+    #         - "traefik.http.routers.ombi.rule=Host(`ombi.${TRAEFIK_DOMAIN}`)"
+    #         - "traefik.http.routers.ombi.middlewares=security-headers@file"
 
     # flaresolverr:
     #     # DockerHub mirror flaresolverr/flaresolverr:latest
