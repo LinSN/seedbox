@@ -52,15 +52,31 @@ services:
             - "traefik.http.routers.forward-oauth.entrypoints=secure"
             - "traefik.http.routers.forward-oauth.tls.certresolver=le"
             
+    wireguard:
+        image: linuxserver/wireguard:latest
+        container_name: wireguard
+        cap_add:
+          - NET_ADMIN
+          - SYS_MODULE
+        volumes:
+          - configwireguard:/config           # place your ProtonVPN wg0.conf inside this folder
+          - /lib/modules:/lib/modules:ro
+        environment:
+          - TZ=${TZ}
+        sysctls:
+          - net.ipv4.conf.all.src_valid_mark=1
+        restart: unless-stopped
+
     transmission:
         image: lscr.io/linuxserver/transmission
         container_name: transmission
+        network_mode: "service:wireguard"
         restart: unless-stopped
         environment:
             - PGID=${PGID}
             - PUID=${PUID}
             - TZ=${TZ}
-            - TRANSMISSION_WEB_HOME=/config/Shift            # optionnel
+            # - TRANSMISSION_WEB_HOME=/config/flood            # optionnel
             # --- Sécurité RPC ---
             - WHITELIST=192.168.*,10.*,172.*                      # RPC accessible seulement depuis ton LAN
         # --- Divers ---
@@ -68,15 +84,6 @@ services:
         volumes:
             - configtransmission:/config
             - downloads:/downloads
-
-        # ⚠️ ON RETIRE le publish du port 9091
-        expose:
-            - "9091"                                        # visible uniquement dans le réseau Docker
-
-        # Le port 51413 reste publié pour les pairs bittorrent
-        ports:
-            - "51413:51413/tcp"
-            - "51413:51413/udp"
 
         labels:
             - "traefik.enable=true"
@@ -222,6 +229,23 @@ services:
             - "traefik.http.routers.prowlarr.rule=Host(`prowlarr.${TRAEFIK_DOMAIN}`)"
             - "traefik.http.routers.prowlarr.middlewares=google-oauth@file,security-headers@file"
 
+    flood:
+        image: jesec/flood              # UI web seule (mode proxy)
+        container_name: flood
+        restart: unless-stopped
+        environment:
+            - HOME=/config                 # où Flood stockera sa DB (sessions, prefs…)
+            - PGID=${PGID}
+            - PUID=${PUID}
+            - TZ=${TZ}
+        volumes:
+            - configflood:/config         # volume persistant
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.flood.rule=Host(`flood.${TRAEFIK_DOMAIN}`)"
+            - "traefik.http.routers.flood.middlewares=google-oauth@file,security-headers@file"
+            - "traefik.http.services.flood.loadbalancer.server.port=3000"
+
     # ombi:
     #     image: lscr.io/linuxserver/ombi:latest
     #     container_name: ombi
@@ -312,6 +336,14 @@ volumes:
         driver: local-persist
         driver_opts:
             mountpoint: /data/config/ombi
+    configwireguard:
+      driver: local-persist
+      driver_opts:
+          mountpoint: /data/config/wireguard
+    configflood:
+        driver: local-persist
+        driver_opts:
+            mountpoint: /data/config/flood
     downloads:
         driver: local-persist
         driver_opts:
